@@ -17,7 +17,16 @@
     </nav>
 
     <div class="container my-5">
-        <h1 class="mb-4 text-center">Observations Dashboard</h1>
+        <h1 class="mb-4 text-center">Наблюдения</h1>
+
+        <div class="mb-3">
+            <label for="filterSelect" class="form-label text-black">Фильтр</label>
+            <select id="filterSelect" class="form-select">
+              <option value="all">Все</option>
+              <option value="with">С изображениеми</option>
+              <option value="without">Без изображений</option>
+            </select>
+          </div>          
 
         <div id="loading" class="text-center">
             <div class="spinner-border text-primary" role="status">
@@ -27,9 +36,15 @@
 
         <div id="observations" class="row"></div>
 
+        <div class="text-center mt-4">
+            <button id="toggleViewBtn" class="btn btn-outline-orange">Показать больше</button>
+        </div>        
+
         <div class="mt-5">
-            <h3 class="text-center">Observations Overview</h3>
-            <canvas id="observationsChart" width="400" height="200"></canvas>
+            <h3 class="text-center">График наблюдений</h3>
+            <div class="chart-container mx-auto my-4">
+                <canvas id="observationsChart"></canvas>
+            </div>            
         </div>
     </div>
 

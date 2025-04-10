@@ -38,3 +38,34 @@ canvas {
     border-radius: 10px;
     padding: 20px;
 }
+
+#observations {
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-outline-orange {
+    color: rgb(254, 94, 34);
+    border: 2px solid rgb(254, 94, 34);
+    background-color: transparent;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-orange:hover{
+    background-color: rgb(254, 94, 34);
+    color: white;
+    border-color: rgb(254, 94, 34);
+}
+
+.chart-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#observationsChart {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.form-select {
+    max-width: 100px;
+}
