@@ -3,24 +3,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingIndicator = document.getElementById('loading');
     const toggleBtn = document.getElementById('toggleViewBtn');
     const filterSelect = document.getElementById('filterSelect');
-    const apiUrl = 'https://sonik.space/api/observations/';
+    var apiUrl = 'https://sonik.space/api/observations/?format=json';
+    console.log('Initial apiUrl:', apiUrl);
 
     let allData = [];
-    let isExpanded = false;
     let allCards = [];
 
     fetch(apiUrl)
-        .then(response => response.json())
+        .then(response => {
+            // Extract the 'Link' header
+            const linkHeader = response.headers.get('Link');
+            if (linkHeader) {
+                const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                if (match) {
+                    apiUrl = match[1]; // Update apiUrl to the next link
+                    console.log('Updated apiUrl:', apiUrl);
+                }
+            }
+            return response.json();
+        })
         .then(data => {
             loadingIndicator.style.display = 'none';
             allData = data;
             updateDisplay();
-            renderChart(data);
+            // renderChart(data);
         })
         .catch(error => {
             console.error('Error fetching data:', error);
             loadingIndicator.innerHTML = '<p class="text-danger">Не получается загрузить данные.</p>';
         });
+    
+    toggleBtn.addEventListener('click', () => {
+        fetch(apiUrl)
+            .then(response => {
+                const linkHeader = response.headers.get('Link');
+                console.log(response.headers);
+                if (linkHeader) {
+                    const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                    if (match) {
+                        apiUrl = match[1];
+                        console.log('Updated apiUrl:', apiUrl);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingIndicator.style.display = 'none';
+                allData = allData.concat(data);
+                updateDisplay();
+                // renderChart(data);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                loadingIndicator.innerHTML = '<p class="text-danger">Не получается загрузить данные.</p>';
+            });
+    });
+    
 
     function createCard(obs) {
         const col = document.createElement('div');
@@ -70,74 +108,59 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDisplay() {
         observationsContainer.innerHTML = '';
         allCards = [];
-
+    
         const selectedFilter = filterSelect.value;
         let filteredData = allData;
-
+        console.log(allData.length);
+        console.log(allCards.length)
         if (selectedFilter === 'with') {
             filteredData = allData.filter(obs => obs.demodulated_path);
         } else if (selectedFilter === 'without') {
             filteredData = allData.filter(obs => !obs.demodulated_path);
         }
-
+    
         filteredData.forEach(obs => {
             const card = createCard(obs);
             allCards.push(card);
         });
-
-        const initial = allCards.slice(0, 6);
-        initial.forEach(card => observationsContainer.appendChild(card));
-
-        isExpanded = false;
-        toggleBtn.textContent = 'Показать больше';
+    
+        allCards.forEach(card => observationsContainer.appendChild(card));
     }
-
-    toggleBtn.addEventListener('click', () => {
-        if (!isExpanded) {
-            allCards.slice(6).forEach(card => observationsContainer.appendChild(card));
-            toggleBtn.textContent = 'Показать меньше';
-            toggleBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        } else {
-            allCards.slice(6).forEach(card => observationsContainer.removeChild(card));
-            toggleBtn.textContent = 'Показать больше';
-            document.getElementById('observations').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        isExpanded = !isExpanded;
-    });
 
     filterSelect.addEventListener('change', updateDisplay);
 
-    function renderChart(data) {
-        const plannedCount = data.filter(obs => obs.status === 'future').length;
-        const completedCount = data.filter(obs => obs.status !== 'future').length;
+    // function renderChart(data) {
+    //     const plannedCount = data.filter(obs => obs.status === 'future').length;
+    //     const completedCount = data.filter(obs => obs.status !== 'future').length;
 
-        const ctx = document.getElementById('observationsChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Планируются', 'Завершённые'],
-                datasets: [{
-                    label: 'Наблюдения',
-                    data: [plannedCount, completedCount],
-                    backgroundColor: ['rgba(255, 193, 7, 0.6)', 'rgba(40, 167, 69, 0.6)'],
-                    borderColor: ['rgba(255, 193, 7, 1)', 'rgba(40, 167, 69, 1)'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
+    //     const ctx = document.getElementById('observationsChart').getContext('2d');
+    //     new Chart(ctx, {
+    //         type: 'bar',
+    //         data: {
+    //             labels: ['Планируются', 'Завершённые'],
+    //             datasets: [{
+    //                 label: 'Наблюдения',
+    //                 data: [plannedCount, completedCount],
+    //                 backgroundColor: ['rgba(255, 193, 7, 0.6)', 'rgba(40, 167, 69, 0.6)'],
+    //                 borderColor: ['rgba(255, 193, 7, 1)', 'rgba(40, 167, 69, 1)'],
+    //                 borderWidth: 1
+    //             }]
+    //         },
+    //         options: {
+    //             responsive: true,
+    //             plugins: {
+    //                 legend: {
+    //                     display: true,
+    //                     position: 'top'
+    //                 }
+    //             },
+    //             scales: {
+    //                 y: {
+    //                     beginAtZero: true
+    //                 }
+    //             }
+    //         }
+    //     });
+    // }
 });
+
