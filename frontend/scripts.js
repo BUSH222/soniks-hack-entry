@@ -132,4 +132,3 @@ document.addEventListener('DOMContentLoaded', () => {
     filterSelect.addEventListener('change', doFilterPreFetch);
 
 });
-
