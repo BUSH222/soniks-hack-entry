@@ -11,12 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetch(apiUrl)
         .then(response => {
-            // Extract the 'Link' header
             const linkHeader = response.headers.get('Link');
             if (linkHeader) {
                 const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
                 if (match) {
-                    apiUrl = match[1]; // Update apiUrl to the next link
+                    apiUrl = match[1];
                     console.log('Updated apiUrl:', apiUrl);
                 }
             }
@@ -26,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingIndicator.style.display = 'none';
             allData = data;
             updateDisplay();
-            // renderChart(data);
         })
         .catch(error => {
             console.error('Error fetching data:', error);
@@ -34,10 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     
     toggleBtn.addEventListener('click', () => {
-        fetch(apiUrl)
+        doFetch();
+    });
+
+    function doFetch(){
+        let cond = ''
+        if (filterSelect.value === 'good' && ! apiUrl.includes('status=good')) {
+            cond = '&status=good';
+        }
+        fetch(apiUrl + cond)
             .then(response => {
                 const linkHeader = response.headers.get('Link');
-                console.log(response.headers);
                 if (linkHeader) {
                     const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
                     if (match) {
@@ -51,13 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadingIndicator.style.display = 'none';
                 allData = allData.concat(data);
                 updateDisplay();
-                // renderChart(data);
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
                 loadingIndicator.innerHTML = '<p class="text-danger">Не получается загрузить данные.</p>';
             });
-    });
+    }
     
 
     function createCard(obs) {
@@ -109,17 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         observationsContainer.innerHTML = '';
         allCards = [];
     
-        const selectedFilter = filterSelect.value;
-        let filteredData = allData;
-        console.log(allData.length);
-        console.log(allCards.length)
-        if (selectedFilter === 'with') {
-            filteredData = allData.filter(obs => obs.demodulated_path);
-        } else if (selectedFilter === 'without') {
-            filteredData = allData.filter(obs => !obs.demodulated_path);
-        }
-    
-        filteredData.forEach(obs => {
+        allData.forEach(obs => {
             const card = createCard(obs);
             allCards.push(card);
         });
@@ -127,40 +121,15 @@ document.addEventListener('DOMContentLoaded', () => {
         allCards.forEach(card => observationsContainer.appendChild(card));
     }
 
-    filterSelect.addEventListener('change', updateDisplay);
+    function doFilterPreFetch(){
+        apiUrl = 'https://sonik.space/api/observations/?format=json';
+        observationsContainer.innerHTML = '';
+        allData = [];
+        allCards = [];
+        doFetch();
+    }
 
-    // function renderChart(data) {
-    //     const plannedCount = data.filter(obs => obs.status === 'future').length;
-    //     const completedCount = data.filter(obs => obs.status !== 'future').length;
+    filterSelect.addEventListener('change', doFilterPreFetch);
 
-    //     const ctx = document.getElementById('observationsChart').getContext('2d');
-    //     new Chart(ctx, {
-    //         type: 'bar',
-    //         data: {
-    //             labels: ['Планируются', 'Завершённые'],
-    //             datasets: [{
-    //                 label: 'Наблюдения',
-    //                 data: [plannedCount, completedCount],
-    //                 backgroundColor: ['rgba(255, 193, 7, 0.6)', 'rgba(40, 167, 69, 0.6)'],
-    //                 borderColor: ['rgba(255, 193, 7, 1)', 'rgba(40, 167, 69, 1)'],
-    //                 borderWidth: 1
-    //             }]
-    //         },
-    //         options: {
-    //             responsive: true,
-    //             plugins: {
-    //                 legend: {
-    //                     display: true,
-    //                     position: 'top'
-    //                 }
-    //             },
-    //             scales: {
-    //                 y: {
-    //                     beginAtZero: true
-    //                 }
-    //             }
-    //         }
-    //     });
-    // }
 });
 
