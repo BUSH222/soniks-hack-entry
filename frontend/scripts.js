@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => {
             const linkHeader = response.headers.get('Link');
             if (linkHeader) {
-                const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
-                if (match) {
-                    apiUrl = match[1];
+                const Match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                if (Match) {
+                    apiUrl = Match[1];
                     console.log('Updated apiUrl:', apiUrl);
                 }
             }
@@ -37,16 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function doFetch(){
         let cond = ''
-        if (filterSelect.value === 'good' && ! apiUrl.includes('status=good')) {
+        if ((filterSelect.value === 'good') && (! apiUrl.includes('status=good'))) {
             cond = '&status=good';
         }
         fetch(apiUrl + cond)
             .then(response => {
                 const linkHeader = response.headers.get('Link');
                 if (linkHeader) {
-                    const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
-                    if (match) {
-                        apiUrl = match[1];
+                    const Match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                    if (Match) {
+                        apiUrl = Match[1];
                         console.log('Updated apiUrl:', apiUrl);
                     }
                 }
